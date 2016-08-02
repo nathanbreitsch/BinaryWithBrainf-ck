@@ -6,12 +6,12 @@ The following is a program, written in brainfuck, to translate binary numbers in
 The input is limited to numbers which have single-digit decimal representation since the output is contained in a single brainfuck cell and is interpreted as an ascii character.  If you have an ascii table and are willing to subtract 48 from something, then the program will work for inputs up to 255 decimal, or the maximum value of a brainfuck cell.
 
 ``` brainfuck
--+ [ - < + ] ->>>[-]++ [ - < + ] ->, [ + [ - < + ] ->------------------------------------------------[+ [ - < + ] ->>>>>>>>>>[-]+ [ - < + ] ->>>[-+ [ - < + ] ->>++ [ - < + ] ->>>>>>>>>>++ [ - < + ] ->>>]+ [ - < + ] ->>>[-]+ [ - < + ] ->>>>>>>>>>[-+ [ - < + ] ->>>++ [ - < + ] ->>>>>>>>>>]+ [ - < + ] ->[-]]+ [ - < + ] ->>>>[-]+ [ - < + ] ->>>>>>>>>>[-]+ [ - < + ] ->>>[-+ [ - < + ] ->>>>++ [ - < + ] ->>>>>>>>>>++ [ - < + ] ->>>]+ [ - < + ] ->>>[-]+ [ - < + ] ->>>>>>>>>>[-+ [ - < + ] ->>>++ [ - < + ] ->>>>>>>>>>]+ [ - < + ] ->>>>>>>>>>[-]+ [ - < + ] ->>>[-+ [ - < + ] ->>>>++ [ - < + ] ->>>>>>>>>>++ [ - < + ] ->>>]+ [ - < + ] ->>>[-]+ [ - < + ] ->>>>>>>>>>[-+ [ - < + ] ->>>++ [ - < + ] ->>>>>>>>>>]+ [ - < + ] ->>>[-]+ [ - < + ] ->>>>[-+ [ - < + ] ->>>++ [ - < + ] ->>>>]+ [ - < + ] ->,]+ [ - < + ] ->>+ [ - < + ] ->>++++++++++++++++++++++++++++++++++++++++++++++++.
+-+ [ - < + ] ->, [ + [ - < + ] ->>>[-]+ [ - < + ] ->>>>[-]+ [ - < + ] ->>[-+ [ - < + ] ->>>++ [ - < + ] ->>>>++ [ - < + ] ->>]+ [ - < + ] ->>[-]+ [ - < + ] ->>>>[-+ [ - < + ] ->>++ [ - < + ] ->>>>]+ [ - < + ] ->>>>[-]+ [ - < + ] ->>>[-+ [ - < + ] ->>++ [ - < + ] ->>>>++ [ - < + ] ->>>]+ [ - < + ] ->>>[-]+ [ - < + ] ->>>>[-+ [ - < + ] ->>>++ [ - < + ] ->>>>]+ [ - < + ] ->------------------------------------------------+ [ - < + ] ->>>[-]+ [ - < + ] ->[-+ [ - < + ] ->>++ [ - < + ] ->>>++ [ - < + ] ->]+ [ - < + ] ->[-]+ [ - < + ] ->>>[-+ [ - < + ] ->++ [ - < + ] ->>>]+ [ - < + ] ->,]+ [ - < + ] ->>+ [ - < + ] ->>++++++++++++++++++++++++++++++++++++++++++++++++.
 ```
 
 The code you see above works!  If you don't believe me, you can test it in this [interpreter](https://www.nayuki.io/page/brainfuck-interpreter-javascript).
 
-I do not recommend writing brainfuck directly (if at all) so we instead build up a bunch of reusable strings using haskell
+It is a well accepted best practice not to write brainfuck directly (or at all, for that matter).  Therefore, we build up a bunch of reusable strings with haskell.
 
 ![Brainfuck Best Practices](./generate.png)
 
@@ -70,25 +70,6 @@ addTo addr1 addr2 safeSpace =
 copyTo addr1 addr2 safeSpace = zeroCell addr2 ++ addTo addr1 addr2 safeSpace
 ```
 
-**multiply** and **power** turn out not to be nessesary, but were interesting to write.  Multiplication seemed to need two extra cells and exponentes seemed to require four.  It is probably possible to abstract the repeated application of a given operation.
-
-
-```haskell
-multiply addr1 addr2 addr3 ss1 ss2 = 
-    zeroCell addr3 ++
-    copyTo addr2 ss1 ss2 ++ zeroCell ss2 ++
-    goto ss1 ++ "[-" ++ addTo addr1 addr3 ss2 ++ goto ss1 ++ "]"
-```
-
-
-```haskell
-power addr1 addr2 addr3 ss1 ss2 ss3 ss4 = zeroCell addr3 ++ "+" ++
-    copyTo addr2 ss1 ss2 ++ zeroCell ss2 ++
-    goto ss1 ++ "[-" ++ multiply addr1 addr3 ss2 ss3 ss4 ++ 
-        zeroCell ss3 ++ zeroCell ss4 ++
-        destrMoveTo ss2 addr3 ++ goto ss1 ++ "]"
-```
-
 
 ```haskell
 readDoWrite action readIndex outIndex finalTransform = 
@@ -98,24 +79,35 @@ readDoWrite action readIndex outIndex finalTransform =
 
 
 ```haskell
+double addr ss1 ss2 = copyTo addr ss1 ss2 ++ addTo ss1 addr ss2
+```
+
+
+```haskell
 fromAscii x = goto x ++ replicate 48 '-'
 toAscii x = goto x ++ replicate 48 '+'
 ```
 
-- 0: Home
-- 1: Read Register
-- 2: Agg and Output
-- 3: Current $2^n$
+
+```haskell
+home = 0
+inputCell = 1
+outputCell = 2
+safeSpace1 = 3
+safeSpace2 = 4
+```
+
+## The Final Program:
 
 
 ```haskell
-"-" ++ setCell 3 1 ++ readDoWrite (fromAscii 1 ++ 
-    "[" ++ addTo 3 2 safeSpace1 ++
-        zeroCell 1 ++ "]" ++
-        copyTo 3 4 safeSpace1 ++ addTo 3 4 safeSpace1 ++ destrMoveTo 4 3
-    ) 1 2 (toAscii 2)
+"-" ++ readDoWrite (
+        double outputCell safeSpace1 safeSpace2 ++
+        fromAscii inputCell ++ 
+        addTo inputCell outputCell safeSpace1
+    ) 1 2 (toAscii outputCell)
 ```
 
 
-    "-+ [ - < + ] ->>>[-]++ [ - < + ] ->, [ + [ - < + ] ->------------------------------------------------[+ [ - < + ] ->>>>>>>>>>[-]+ [ - < + ] ->>>[-+ [ - < + ] ->>++ [ - < + ] ->>>>>>>>>>++ [ - < + ] ->>>]+ [ - < + ] ->>>[-]+ [ - < + ] ->>>>>>>>>>[-+ [ - < + ] ->>>++ [ - < + ] ->>>>>>>>>>]+ [ - < + ] ->[-]]+ [ - < + ] ->>>>[-]+ [ - < + ] ->>>>>>>>>>[-]+ [ - < + ] ->>>[-+ [ - < + ] ->>>>++ [ - < + ] ->>>>>>>>>>++ [ - < + ] ->>>]+ [ - < + ] ->>>[-]+ [ - < + ] ->>>>>>>>>>[-+ [ - < + ] ->>>++ [ - < + ] ->>>>>>>>>>]+ [ - < + ] ->>>>>>>>>>[-]+ [ - < + ] ->>>[-+ [ - < + ] ->>>>++ [ - < + ] ->>>>>>>>>>++ [ - < + ] ->>>]+ [ - < + ] ->>>[-]+ [ - < + ] ->>>>>>>>>>[-+ [ - < + ] ->>>++ [ - < + ] ->>>>>>>>>>]+ [ - < + ] ->>>[-]+ [ - < + ] ->>>>[-+ [ - < + ] ->>>++ [ - < + ] ->>>>]+ [ - < + ] ->,]+ [ - < + ] ->>+ [ - < + ] ->>++++++++++++++++++++++++++++++++++++++++++++++++."
+    "-+ [ - < + ] ->, [ + [ - < + ] ->>>[-]+ [ - < + ] ->>>>[-]+ [ - < + ] ->>[-+ [ - < + ] ->>>++ [ - < + ] ->>>>++ [ - < + ] ->>]+ [ - < + ] ->>[-]+ [ - < + ] ->>>>[-+ [ - < + ] ->>++ [ - < + ] ->>>>]+ [ - < + ] ->>>>[-]+ [ - < + ] ->>>[-+ [ - < + ] ->>++ [ - < + ] ->>>>++ [ - < + ] ->>>]+ [ - < + ] ->>>[-]+ [ - < + ] ->>>>[-+ [ - < + ] ->>>++ [ - < + ] ->>>>]+ [ - < + ] ->------------------------------------------------+ [ - < + ] ->>>[-]+ [ - < + ] ->[-+ [ - < + ] ->>++ [ - < + ] ->>>++ [ - < + ] ->]+ [ - < + ] ->[-]+ [ - < + ] ->>>[-+ [ - < + ] ->++ [ - < + ] ->>>]+ [ - < + ] ->,]+ [ - < + ] ->>+ [ - < + ] ->>++++++++++++++++++++++++++++++++++++++++++++++++."
 
