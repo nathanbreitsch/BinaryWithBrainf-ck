@@ -6,7 +6,12 @@ The following is a program, written in brainfuck, to translate binary numbers in
 The input is limited to numbers which have single-digit decimal representation since the output is contained in a single brainfuck cell and is interpreted as an ascii character.  If you have an ascii table and are willing to subtract 48 from something, then the program will work for inputs up to 255 decimal, or the maximum value of a brainfuck cell.
 
 ``` brainfuck
--+ [ - < + ] ->, [ + [ - < + ] ->>>[-]+ [ - < + ] ->>>>[-]+ [ - < + ] ->>[-+ [ - < + ] ->>>++ [ - < + ] ->>>>++ [ - < + ] ->>]+ [ - < + ] ->>[-]+ [ - < + ] ->>>>[-+ [ - < + ] ->>++ [ - < + ] ->>>>]+ [ - < + ] ->>>>[-]+ [ - < + ] ->>>[-+ [ - < + ] ->>++ [ - < + ] ->>>>++ [ - < + ] ->>>]+ [ - < + ] ->>>[-]+ [ - < + ] ->>>>[-+ [ - < + ] ->>>++ [ - < + ] ->>>>]+ [ - < + ] ->------------------------------------------------+ [ - < + ] ->>>[-]+ [ - < + ] ->[-+ [ - < + ] ->>++ [ - < + ] ->>>++ [ - < + ] ->]+ [ - < + ] ->[-]+ [ - < + ] ->>>[-+ [ - < + ] ->++ [ - < + ] ->>>]+ [ - < + ] ->,]+ [ - < + ] ->>+ [ - < + ] ->>++++++++++++++++++++++++++++++++++++++++++++++++.
+- + [ - < + ] ->, [ + [ - < + ] ->>>[-]+ [ - < + ] ->>>>[-]+ [ - < + ] ->>[-+ [ - < + ] ->>>++ 
+[ - < + ] ->>>>++ [ - < + ] ->>]+ [ - < + ] ->>[-]+ [ - < + ] ->>>>[-+ [ - < + ] ->>++ [ - < + ]
+->>>>]+ [ - < + ] ->>>>[-]+ [ - < + ] ->>>[-+ [ - < + ] ->>++ [ - < + ] ->>>>++ [ - < + ] ->>>]+ 
+[ - < + ] ->>>[-]+ [ - < + ] ->>>>[-+ [ - < + ] ->>>++ [ - < + ] ->>>>]+ [ - < + ] ->------------------------------------------------+ [ - < + ] ->>>[-]+ [ - < + ] ->[-+ [ - < + ]
+->>++ [ - < + ] ->>>++ [ - < + ] ->]+ [ - < + ] ->[-]+ [ - < + ] ->>>[-+ [ - < + ] ->++ [ - < + ]
+->>>]+ [ - < + ] ->,]+ [ - < + ] ->>+ [ - < + ] ->>++++++++++++++++++++++++++++++++++++++++++++++++ .
 ```
 
 The code you see above works!  If you don't believe me, you can test it in this [interpreter](https://www.nayuki.io/page/brainfuck-interpreter-javascript).
